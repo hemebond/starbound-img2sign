@@ -1,235 +1,186 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Img2Sign</title>
-    <style>
-        body {
-            background-color: #1d1c3e;
-            color: #fff;
-            margin: 0;
-            padding: 10px;
-            font-family: Verdana, Geneva, sans-serif;
-        }
+	<head>
+		<meta charset="utf-8">
 
-        a {
-            color: #acffff;
-        }
+		<title>Img2Sign</title>
+		<meta name="description" content="Convert an image into Starbound spawnitem code for custom signs.">
+		<meta name="author" content="TheXP, James O'Neill">
 
-        .ital {
-            font-style: italic;
-        }
+		<link rel="stylesheet" href="index.css">
+	</head>
+	<body>
+		<div class="content">
+			<header>
+				<h1>Img2Sign <small>(v0.6) for Starbound</small></h1>
+			</header>
 
-        .body {
-            display: flex;
-            justify-content: center;
-            align-content: space-around;
-            margin-bottom: 20px;
-        }
+			<div class="instructions">
+				How to:
+				<ol>
+					<li>Prepare image that can be divided into sections of 32x8 pixels.</li>
+					<li>Browse for image.</li>
+					<li>Customise border.</li>
+					<li>Click "Process Image". Depending on image size this could take a few seconds.</li>
+					<li>Copy and use the commands inside the game.</li>
+				</ol>
 
-        .title {
-            font-size: 3em;
-            font-weight: 100;
-            margin-bottom: 20px;
-        }
+				<p>For more information about the <code>/spawnitem</code> command, visit <a href="http://starbounder.org/Spawn_Item_Command">the wiki</a>.</p>
+			</div>
 
-        .small {
-            font-size: 0.3em;
-            font-style: italic;
-        }
+			<div class="editor">
+				<form>
+					<fieldset>
+						<legend>Image</legend>
 
-        #imageCanvas {
-            background-image: url(data:image/png;base64,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);
-        }
+						<p class="previews">
+							<canvas id="imageCanvas" width="128" height="32">
+								Your browser does not support the HTML5 canvas tag.
+							</canvas>
+							<canvas id="logicCanvas" width="32" height="8">
+								Your browser does not support the HTML5 canvas tag.
+							</canvas>
+						</p>
 
-        #logicCanvas {
-            background-image: url(data:image/png;base64,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);
-        }
+						<p>
+							<label for="inputImage">Image File:</label>
+							<input id="inputImage" type="file" name="inputImage">
+						</p>
+					</fieldset>
 
-        .image {
-            text-align: center;
-            padding: 20px 0;
-            border-bottom: 1px dotted #fff;
-        }
+					<fieldset>
+						<legend>Borders</legend>
 
-        .ui {
-            padding: 10px;
-            line-height: 2em;
-            text-align: center;
-            border-bottom: 1px dotted #fff;
-        }
+						<p>
+							<label for="enableBorders">Enable borders?
+							<input id="enableBorders" type="checkbox" name="enableBorders" checked></label>
+						</p>
 
-        .colorsel {
-            background-color: transparent;
-            border: none;
-            padding: 0;
-            width: 32px;
-            top: 0;
-        }
+						<p>
+							<label for="outerBorderColor">Outer border:</label>
+							<input id="outerBorderColor" type="color" name="outerBorderColor" value="#a58038">
+						</p>
 
-        .toleft {
-            display: block;
-            text-align: left;
-            width: 100%;
-        }
+						<p>
+							<label for="innerBorderColor">Inner border:</label>
+							<input id="innerBorderColor" type="color" name="innerBorderColor" value="#b79c40">
+						</p>
+					</fieldset>
 
-        .toright {
-            display: block;
-            text-align: right;
-            width: 100%;
-        }
+					<fieldset>
+						<legend>Light</legend>
 
-        .code {
-            word-break: break-all;
-            font-family: "Courier New", Courier, monospace;
-            font-size: 0.75em;
-            line-height: 1em;
-            margin-top: 10px;
-            text-align: center;
-            margin-right: auto;
-            margin-left: auto;
-        }
+						<p>
+							<label for="enableLight">Enable light?
+							<input id="enableLight" type="checkbox" name="enableLight" checked></label>
+						</p>
 
-        .ta {
-            resize: none;
-            width: 99%;
-        }
-    </style>
-</head>
-<body>
+						<p>
+							<label for="lightColor">Light colour:</label>
+							<input id="lightColor" type="color" name="lightColor" value="#a58038">
+						</p>
+					</fieldset>
 
-<div class="body">
-    <div class="box">
-        <div class="title">Img2Sign<span class="small"> (v0.6) for Starbound</span></div>
+					<input type="button" onclick="processData()" value="Process Image">
+				</form>
+			</div>
 
-        <div class="image">
-            <canvas id="imageCanvas" width="128" height="32">
-                Your browser does not support the HTML5 canvas tag.
-            </canvas>
-            <canvas id="logicCanvas" width="32" height="8">
-                Your browser does not support the HTML5 canvas tag.
-            </canvas>
-        </div>
-        <div class="ui">
-            <span class="toleft">Image:</span>
-            <input class="toright" type="file" id="inputImage" name="inputImage"/>
-            <span class="toleft">Outer border:</span>
-            <input class="toright colorsel" type="color" id="outerBorderColor" name="outerBorderColor" value="#a58038"/>
-            <span class="toleft">Inner border:</span>
-            <input class="toright colorsel" type="color" id="innerBorderColor" name="innerBorderColor" value="#b79c40"/>
-            <span class="toleft">Enable borders? (ingame)
-            <input type="checkbox" id="enableBorders" name="enableBorders" checked></span>
-            <br>
-            <input type="button" onclick="processData()" value="Process Image"/>
-        </div>
-        <div class="ui" style="text-align: left">
-            How to:<br>
-            - First, prepare your image. Remember that it must be divisible in sections of 32 x 8 pixels, to fit the
-            signs.<br>
-            - Select your image file, choose the border colors and click "Process Image".<br>
-            &nbsp;&nbsp;&nbsp;Depending on the size of your image, it could take a few seconds.<br>
-            - Now, just copy and use the commands inside the game.<br>
-            &nbsp;&nbsp;&nbsp;For more information about the <span class="ital">/spawnitem</span> command, visit
-            <a href="http://starbounder.org/Spawn_Item_Command">the wiki</a>.
-        </div>
-    </div>
-</div>
-<div id="code" class="code">
-</div>
+			<div id="code" class="code"></div>
+		</div>
 
-<script>
-    var inputImage = document.getElementById('inputImage');
-    inputImage.addEventListener('change', processImage, false);
-    var outerBorderColor = document.getElementById('outerBorderColor');
-    outerBorderColor.addEventListener('change', changeBorders, false);
-    var innerBorderColor = document.getElementById('innerBorderColor');
-    innerBorderColor.addEventListener('change', changeBorders, false);
-    var enableBorders = document.getElementById('enableBorders');
+		<script>
+			var inputImage = document.getElementById('inputImage');
+			inputImage.addEventListener('change', processImage, false);
+			var outerBorderColor = document.getElementById('outerBorderColor');
+			outerBorderColor.addEventListener('change', changeBorders, false);
+			var innerBorderColor = document.getElementById('innerBorderColor');
+			innerBorderColor.addEventListener('change', changeBorders, false);
+			var enableBorders = document.getElementById('enableBorders');
 
-    var imageCanvas = document.getElementById('imageCanvas');
-    var logicCanvas = document.getElementById('logicCanvas');
-    var imageCtx = imageCanvas.getContext('2d');
-    var logicCtx = logicCanvas.getContext('2d');
+			var imageCanvas = document.getElementById('imageCanvas');
+			var logicCanvas = document.getElementById('logicCanvas');
+			var imageCtx = imageCanvas.getContext('2d');
+			var logicCtx = logicCanvas.getContext('2d');
 
-    function processImage(e) {
-        console.log(outerBorderColor.value);
-        console.log(innerBorderColor.value);
+			function processImage(e) {
+				console.log(outerBorderColor.value);
+				console.log(innerBorderColor.value);
 
-        var reader = new FileReader();
-        reader.onload = function (event) {
-            var img = new Image();
-            img.onload = function () {
-                imageCanvas.width = img.width * 4 + 16;
-                imageCanvas.height = img.height * 4 + 16;
-                imageCtx.mozImageSmoothingEnabled = false;
-                imageCtx.webkitImageSmoothingEnabled = false;
-                imageCtx.msImageSmoothingEnabled = false;
-                imageCtx.imageSmoothingEnabled = false;
-                imageCtx.drawImage(img, 8, 8, img.width * 4, img.height * 4);
+				var reader = new FileReader();
+				reader.onload = function (event) {
+					var img = new Image();
+					img.onload = function () {
+						imageCanvas.width = img.width * 4 + 16;
+						imageCanvas.height = img.height * 4 + 16;
+						imageCtx.mozImageSmoothingEnabled = false;
+						imageCtx.webkitImageSmoothingEnabled = false;
+						imageCtx.msImageSmoothingEnabled = false;
+						imageCtx.imageSmoothingEnabled = false;
+						imageCtx.drawImage(img, 8, 8, img.width * 4, img.height * 4);
 
-                changeBorders();
+						changeBorders();
 
-                logicCanvas.width = img.width;
-                logicCanvas.height = img.height;
-                logicCtx.drawImage(img, 0, 0);
-            };
-            img.src = event.target.result;
-        };
-        reader.readAsDataURL(e.target.files[0]);
-    }
+						logicCanvas.width = img.width;
+						logicCanvas.height = img.height;
+						logicCtx.drawImage(img, 0, 0);
+					};
+					img.src = event.target.result;
+				};
+				reader.readAsDataURL(e.target.files[0]);
+			}
 
-    function changeBorders() {
-        imageCtx.fillStyle = outerBorderColor.value;
-        imageCtx.fillRect(0, 0, 4, imageCanvas.height);
-        imageCtx.fillRect(imageCanvas.width - 4, 0, 4, imageCanvas.height);
-        imageCtx.fillRect(0, 0, imageCanvas.width, 4);
-        imageCtx.fillRect(0, imageCanvas.height - 4, imageCanvas.width, 4);
-        imageCtx.fillStyle = innerBorderColor.value;
-        imageCtx.fillRect(4, 4, 4, imageCanvas.height - 8);
-        imageCtx.fillRect(imageCanvas.width - 8, 4, 4, imageCanvas.height - 8);
-        imageCtx.fillRect(4, 4, imageCanvas.width - 8, 4);
-        imageCtx.fillRect(4, imageCanvas.height - 8, imageCanvas.width - 8, 4);
-    }
+			function changeBorders() {
+				imageCtx.fillStyle = outerBorderColor.value;
+				imageCtx.fillRect(0, 0, 4, imageCanvas.height);
+				imageCtx.fillRect(imageCanvas.width - 4, 0, 4, imageCanvas.height);
+				imageCtx.fillRect(0, 0, imageCanvas.width, 4);
+				imageCtx.fillRect(0, imageCanvas.height - 4, imageCanvas.width, 4);
+				imageCtx.fillStyle = innerBorderColor.value;
+				imageCtx.fillRect(4, 4, 4, imageCanvas.height - 8);
+				imageCtx.fillRect(imageCanvas.width - 8, 4, 4, imageCanvas.height - 8);
+				imageCtx.fillRect(4, 4, imageCanvas.width - 8, 4);
+				imageCtx.fillRect(4, imageCanvas.height - 8, imageCanvas.width - 8, 4);
+			}
 
-    function processData() {
-        var imgd = logicCtx.getImageData(0, 0, logicCanvas.width, logicCanvas.height);
-        var pix = imgd.data;
+			function processData() {
+				var imgd = logicCtx.getImageData(0, 0, logicCanvas.width, logicCanvas.height);
+				var pix = imgd.data;
 
-        var larg = logicCanvas.width / 32;
-        var alt = logicCanvas.height / 8;
-        var str = "/spawnitem customsign 1 '{\"signData\":[\"?replace;";
-        var blocks = "";
+				var larg = logicCanvas.width / 32;
+				var alt = logicCanvas.height / 8;
+				var str = "/spawnitem customsign 1 '{\"signData\":[\"?replace;";
+				var blocks = "";
 
-        for (var i = 0; i < larg; i++)
-            for (var j = 0; j < alt; j++) {
-                var block = str;
-                for (var x = 1; x <= 32; x++)
-                    for (var y = 8; y >= 1; y--) {
-                        var pos = ("0" + x).slice(-2) + "00" + ("0" + y).slice(-2) + "01";
-                        var tp = truePos((x - 1) + (i * 32), (8 - y) + (j * 8), logicCanvas.width) * 4;
-                        var col = rgbToHex(pix[tp], pix[tp + 1], pix[tp + 2]) + "ff";
+				for (var i = 0; i < larg; i++)
+					for (var j = 0; j < alt; j++) {
+						var block = str;
+						for (var x = 1; x <= 32; x++)
+							for (var y = 8; y >= 1; y--) {
+								var pos = ("0" + x).slice(-2) + "00" + ("0" + y).slice(-2) + "01";
+								var tp = truePos((x - 1) + (i * 32), (8 - y) + (j * 8), logicCanvas.width) * 4;
+								var col = rgbToHex(pix[tp], pix[tp + 1], pix[tp + 2]) + "ff";
 
-                        block += pos + "=" + col + ";";
-                    }
-                block = block.slice(0, -1) + "\"]";
-                if (enableBorders.checked)
-                    block += ", \"frameColors\":[\"" + innerBorderColor.value.substring(1) + "\", \"" + outerBorderColor.value.substring(1) + "\"]}'";
-                else
-                    block += "}'";
-                blocks += "Sign (" + (i + 1) + ", " + (j + 1) + ")<br><br><textarea class=\"ta\" rows=\"2\" onclick=\"this.focus();this.select()\" readonly=\"readonly\">" + block + "</textarea><br><br>";
-            }
-        document.getElementById("code").innerHTML = blocks;
-    }
+								block += pos + "=" + col + ";";
+							}
+						block = block.slice(0, -1) + "\"]";
+						if (enableBorders.checked)
+							block += ", \"frameColors\":[\"" + innerBorderColor.value.substring(1) + "\", \"" + outerBorderColor.value.substring(1) + "\"]}'";
+						else
+							block += "}'";
+						blocks += "<div><p>Sign (" + (i + 1) + ", " + (j + 1) + ")</p><textarea rows=\"2\" onclick=\"this.focus();this.select()\" readonly=\"readonly\">" + block + "</textarea><div>";
+					}
+				document.getElementById("code").innerHTML = blocks;
+			}
 
-    function rgbToHex(r, g, b) {
-        if (r > 255 || g > 255 || b > 255)
-            throw "Invalid color component";
-        return ("000000" + ((r << 16) | (g << 8) | b).toString(16)).slice(-6);
-    }
+			function rgbToHex(r, g, b) {
+				if (r > 255 || g > 255 || b > 255)
+					throw "Invalid color component";
+				return ("000000" + ((r << 16) | (g << 8) | b).toString(16)).slice(-6);
+			}
 
-    function truePos(x, y, w) {
-        return x + y * w;
-    }
-</script>
-</body>
+			function truePos(x, y, w) {
+				return x + y * w;
+			}
+		</script>
+	</body>
 </html>
