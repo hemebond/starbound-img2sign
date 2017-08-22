@@ -19,10 +19,9 @@
 				How to:
 				<ol>
 					<li>Prepare image that can be divided into sections of 32x8 pixels.</li>
-					<li>Browse for image.</li>
-					<li>Customise border.</li>
+					<li>Choose the image and customise the output.</li>
 					<li>Click "Process Image". Depending on image size this could take a few seconds.</li>
-					<li>Copy and use the commands inside the game.</li>
+					<li>Paste the generated <em>spawnitem</em> commands into the game chat.</li>
 				</ol>
 
 				<p>For more information about the <code>/spawnitem</code> command, visit <a href="http://starbounder.org/Spawn_Item_Command">the wiki</a>.</p>
@@ -76,8 +75,8 @@
 						</p>
 
 						<p>
-							<label for="lightColor">Light colour:</label>
-							<input id="lightColor" type="color" name="lightColor" value="#a58038">
+							<label for="signLight">Light colour:</label>
+							<input id="signLight" type="color" name="signLight" value="#888888">
 						</p>
 					</fieldset>
 
@@ -89,13 +88,20 @@
 		</div>
 
 		<script>
+			// signData
 			var inputImage = document.getElementById('inputImage');
 			inputImage.addEventListener('change', processImage, false);
+
+			// frameColors
 			var outerBorderColor = document.getElementById('outerBorderColor');
 			outerBorderColor.addEventListener('change', changeBorders, false);
 			var innerBorderColor = document.getElementById('innerBorderColor');
 			innerBorderColor.addEventListener('change', changeBorders, false);
 			var enableBorders = document.getElementById('enableBorders');
+
+			// signLight
+			var enableLight = document.getElementById('enableLight');
+			var signLight = document.getElementById('signLight');
 
 			var imageCanvas = document.getElementById('imageCanvas');
 			var logicCanvas = document.getElementById('logicCanvas');
@@ -148,26 +154,35 @@
 
 				var larg = logicCanvas.width / 32;
 				var alt = logicCanvas.height / 8;
-				var str = "/spawnitem customsign 1 '{\"signData\":[\"?replace;";
 				var blocks = "";
 
 				for (var i = 0; i < larg; i++)
 					for (var j = 0; j < alt; j++) {
-						var block = str;
+						var customSign = new Object(); // custom sign data to JSONify later
+						var signData = ""; // buffer for "01000801=1f1f1fff;" strings of pixel data
+
 						for (var x = 1; x <= 32; x++)
 							for (var y = 8; y >= 1; y--) {
 								var pos = ("0" + x).slice(-2) + "00" + ("0" + y).slice(-2) + "01";
 								var tp = truePos((x - 1) + (i * 32), (8 - y) + (j * 8), logicCanvas.width) * 4;
 								var col = rgbToHex(pix[tp], pix[tp + 1], pix[tp + 2]) + "ff";
 
-								block += pos + "=" + col + ";";
+								signData += pos + "=" + col + ";";
 							}
-						block = block.slice(0, -1) + "\"]";
-						if (enableBorders.checked)
-							block += ", \"frameColors\":[\"" + innerBorderColor.value.substring(1) + "\", \"" + outerBorderColor.value.substring(1) + "\"]}'";
-						else
-							block += "}'";
-						blocks += "<div><p>Sign (" + (i + 1) + ", " + (j + 1) + ")</p><textarea rows=\"2\" onclick=\"this.focus();this.select()\" readonly=\"readonly\">" + block + "</textarea><div>";
+						customSign.signData = ["?replace;" + signData];
+
+						if (enableBorders.checked) {
+							customSign.frameColors = [
+								innerBorderColor.value.substring(1),
+								outerBorderColor.value.substring(1)
+							];
+						}
+
+						if (enableLight.checked) {
+							customSign.signLight = signLight.value.substring(1);
+						}
+
+						blocks += "<div><p>Sign (" + (i + 1) + ", " + (j + 1) + ")</p><textarea rows=\"2\" onclick=\"this.focus();this.select()\" readonly=\"readonly\">/spawnitem customsign 1 '" + JSON.stringify(customSign) + "'</textarea><div>";
 					}
 				document.getElementById("code").innerHTML = blocks;
 			}
@@ -182,5 +197,6 @@
 				return x + y * w;
 			}
 		</script>
+		<p>Original author
 	</body>
 </html>
