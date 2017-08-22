@@ -33,12 +33,8 @@
 						<legend>Image</legend>
 
 						<p class="previews">
-							<canvas id="imageCanvas" width="128" height="32">
-								Your browser does not support the HTML5 canvas tag.
-							</canvas>
-							<canvas id="logicCanvas" width="32" height="8">
-								Your browser does not support the HTML5 canvas tag.
-							</canvas>
+							<canvas id="imageCanvas" width="128" height="32">Your browser does not support the HTML5 canvas tag.</canvas>
+							<canvas id="logicCanvas" width="32" height="8">Your browser does not support the HTML5 canvas tag.</canvas>
 						</p>
 
 						<p>
@@ -100,6 +96,7 @@
 			var innerBorderColor = document.getElementById('innerBorderColor');
 			innerBorderColor.addEventListener('change', changeBorders, false);
 			var enableBorders = document.getElementById('enableBorders');
+			enableBorders.addEventListener('change', changeBorders, false);
 
 			// signLight
 			var enableLight = document.getElementById('enableLight');
@@ -111,22 +108,17 @@
 			var logicCtx = logicCanvas.getContext('2d');
 
 			function processImage(e) {
-				console.log(outerBorderColor.value);
-				console.log(innerBorderColor.value);
-
 				var reader = new FileReader();
 				reader.onload = function (event) {
 					var img = new Image();
 					img.onload = function () {
-						imageCanvas.width = img.width * 4 + 16;
-						imageCanvas.height = img.height * 4 + 16;
+						imageCanvas.width = img.width * 4;
+						imageCanvas.height = img.height * 4;
 						imageCtx.mozImageSmoothingEnabled = false;
 						imageCtx.webkitImageSmoothingEnabled = false;
 						imageCtx.msImageSmoothingEnabled = false;
 						imageCtx.imageSmoothingEnabled = false;
-						imageCtx.drawImage(img, 8, 8, img.width * 4, img.height * 4);
-
-						changeBorders();
+						imageCtx.drawImage(img, 0, 0, img.width * 4, img.height * 4);
 
 						logicCanvas.width = img.width;
 						logicCanvas.height = img.height;
@@ -138,16 +130,21 @@
 			}
 
 			function changeBorders() {
-				imageCtx.fillStyle = outerBorderColor.value;
-				imageCtx.fillRect(0, 0, 4, imageCanvas.height);
-				imageCtx.fillRect(imageCanvas.width - 4, 0, 4, imageCanvas.height);
-				imageCtx.fillRect(0, 0, imageCanvas.width, 4);
-				imageCtx.fillRect(0, imageCanvas.height - 4, imageCanvas.width, 4);
-				imageCtx.fillStyle = innerBorderColor.value;
-				imageCtx.fillRect(4, 4, 4, imageCanvas.height - 8);
-				imageCtx.fillRect(imageCanvas.width - 8, 4, 4, imageCanvas.height - 8);
-				imageCtx.fillRect(4, 4, imageCanvas.width - 8, 4);
-				imageCtx.fillRect(4, imageCanvas.height - 8, imageCanvas.width - 8, 4);
+				if (enableBorders.checked) {
+					var inner = innerBorderColor.value;
+					var outer = outerBorderColor.value;
+				}
+				else {
+					// use the page background colour
+					var inner = "#1d1c3e";
+					var outer = "#1d1c3e";
+				}
+
+				imageCanvas.style.borderColor = inner;
+				imageCanvas.style.outlineColor = outer;
+
+				logicCanvas.style.borderColor = inner;
+				logicCanvas.style.outlineColor = outer;
 			}
 
 			function processData() {
@@ -198,6 +195,8 @@
 			function truePos(x, y, w) {
 				return x + y * w;
 			}
+
+			changeBorders();
 		</script>
 	</body>
 </html>
