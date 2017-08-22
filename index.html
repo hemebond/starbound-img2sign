@@ -164,7 +164,7 @@
 							for (var y = 8; y >= 1; y--) {
 								var pos = ("0" + x).slice(-2) + "00" + ("0" + y).slice(-2) + "01";
 								var tp = truePos((x - 1) + (i * 32), (8 - y) + (j * 8), logicCanvas.width) * 4;
-								var col = rgbToHex(pix[tp], pix[tp + 1], pix[tp + 2]) + "ff";
+								var col = toHex(pix[tp]) + toHex(pix[tp + 1]) + toHex(pix[tp + 2]) + toHex(pix[tp + 3]);
 
 								signData += pos + "=" + col + ";";
 							}
@@ -184,6 +184,10 @@
 						blocks += "<div><p>Sign (" + (i + 1) + ", " + (j + 1) + ")</p><textarea rows=\"2\" onclick=\"this.focus();this.select()\" readonly=\"readonly\">/spawnitem customsign 1 '" + JSON.stringify(customSign) + "'</textarea><div>";
 					}
 				document.getElementById("code").innerHTML = blocks;
+			}
+
+			function toHex(v) {
+				return String(("0" + v.toString(16)).slice(-2));
 			}
 
 			function rgbToHex(r, g, b) {
