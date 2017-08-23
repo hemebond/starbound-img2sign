@@ -67,12 +67,26 @@
 
 						<p>
 							<label for="enableLight">Enable light?
-							<input id="enableLight" type="checkbox" name="enableLight" checked></label>
+							<input id="enableLight" type="checkbox" name="enableLight"></label>
 						</p>
 
 						<p>
 							<label for="signLight">Light colour:</label>
-							<input id="signLight" type="color" name="signLight" value="#888888">
+							<input id="signLight" type="color" name="signLight" value="#000000">
+						</p>
+					</fieldset>
+
+					<fieldset>
+						<legend>Info</legend>
+
+						<p>
+							<label for="shortDescription">Short description:</label>
+							<input id="shortDescription" name="shortDescription" value="" placeholder="Sign">
+						</p>
+
+						<p>
+							<label for="includePosition">Include position?
+							<input id="includePosition" type="checkbox" name="includePosition" checked></label>
 						</p>
 					</fieldset>
 
@@ -148,12 +162,19 @@
 			}
 
 			function processData() {
+				var shortDescription = document.getElementById('shortDescription').value;
+				var includePosition = document.getElementById('includePosition').checked;
+
 				var imgd = logicCtx.getImageData(0, 0, logicCanvas.width, logicCanvas.height);
 				var pix = imgd.data;
 
 				var larg = logicCanvas.width / 32;
 				var alt = logicCanvas.height / 8;
 				var blocks = "";
+
+				if (includePosition && shortDescription === "") {
+					shortDescription = "Sign";
+				}
 
 				for (var i = 0; i < larg; i++)
 					for (var j = 0; j < alt; j++) {
@@ -180,6 +201,20 @@
 						if (enableLight.checked) {
 							customSign.signLight = signLight.value.substring(1);
 						}
+
+						if (includePosition) {
+							customSign.shortdescription = shortDescription + " (" + (i + 1) + "," + (j + 1) + ")";
+						}
+						else {
+							customSign.shortdescription = shortDescription;
+						}
+
+						// customSign.inventoryIcon = "customicons.png:blank-black";
+						// customSign.animationParts = new Object();
+						// customSign.animationParts.displayed = "signplaceholder.png:blank";
+						// customSign.animationParts.background = "blank";
+						// customSign.animationParts.background = "hazard";
+						// customSign.animationParts.background = "signplaceholder.png:blank"; // transparent background but also removes frames :-(
 
 						blocks += "<div><p>Sign (" + (i + 1) + ", " + (j + 1) + ")</p><textarea rows=\"2\" onclick=\"this.focus();this.select()\" readonly=\"readonly\">/spawnitem customsign 1 '" + JSON.stringify(customSign) + "'</textarea><div>";
 					}
