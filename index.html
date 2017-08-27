@@ -44,29 +44,45 @@
 					</fieldset>
 
 					<fieldset>
-						<legend>Borders</legend>
+						<legend>Borders and Background</legend>
 
 						<p>
-							<label for="enableBorders">Enable borders?
-							<input id="enableBorders" type="checkbox" name="enableBorders" checked></label>
+							<label for="backgroundType">Background:</label>
+							<select id="backgroundType">
+								<option value="none">Transparent</option>
+								<option value="0">Light</option>
+								<option value="1" selected>Dark</option>
+								<option value="2">Wood</option>
+								<option value="3">Bulb</option>
+								<option value="4">Glass</option>
+								<option value="5">Hazard</option>
+							</select>
 						</p>
 
-						<p>
-							<label for="outerBorderColor">Outer border:</label>
-							<input id="outerBorderColor" type="color" name="outerBorderColor" value="#a58038">
-						</p>
+						<fieldset id="borderSettings">
+							<legend>Borders</legend>
+							<p>
+								<label for="enableBorders">Enable:
+								<input id="enableBorders" type="checkbox" name="enableBorders" checked></label>
+							</p>
 
-						<p>
-							<label for="innerBorderColor">Inner border:</label>
-							<input id="innerBorderColor" type="color" name="innerBorderColor" value="#b79c40">
-						</p>
+							<p>
+								<label for="outerBorderColor">Outer border:</label>
+								<input id="outerBorderColor" type="color" name="outerBorderColor" value="#a58038">
+							</p>
+
+							<p>
+								<label for="innerBorderColor">Inner border:</label>
+								<input id="innerBorderColor" type="color" name="innerBorderColor" value="#b79c40">
+							</p>
+						</fieldset>
 					</fieldset>
 
 					<fieldset>
 						<legend>Light</legend>
 
 						<p>
-							<label for="enableLight">Enable light?
+							<label for="enableLight">Enabled:
 							<input id="enableLight" type="checkbox" name="enableLight"></label>
 						</p>
 
@@ -112,6 +128,10 @@
 			var enableBorders = document.getElementById('enableBorders');
 			enableBorders.addEventListener('change', changeBorders, false);
 
+			var backgroundType = document.getElementById('backgroundType');
+			backgroundType.addEventListener('change', changeBackground, false);
+
+
 			// signLight
 			var enableLight = document.getElementById('enableLight');
 			var signLight = document.getElementById('signLight');
@@ -120,6 +140,9 @@
 			var logicCanvas = document.getElementById('logicCanvas');
 			var imageCtx = imageCanvas.getContext('2d');
 			var logicCtx = logicCanvas.getContext('2d');
+
+
+			changeBackground();
 
 			function processImage(e) {
 				var reader = new FileReader();
@@ -144,7 +167,8 @@
 			}
 
 			function changeBorders() {
-				if (enableBorders.checked) {
+				// disable the border settings since they will be transparent anyway
+				if (enableBorders.checked && backgroundType.value != "none") {
 					var inner = innerBorderColor.value;
 					var outer = outerBorderColor.value;
 				}
@@ -159,6 +183,23 @@
 
 				logicCanvas.style.borderColor = inner;
 				logicCanvas.style.outlineColor = outer;
+			}
+
+			function changeBackground() {
+				if (backgroundType.value == "none") {
+					imageCanvas.style.backgroundImage = "none";
+					logicCanvas.style.backgroundImage = "none";
+
+					document.getElementById('borderSettings').setAttribute('disabled', true);
+				}
+				else {
+					imageCanvas.style.backgroundImage = "url('bg_" + backgroundType.value + ".png')";
+					logicCanvas.style.backgroundImage = "url('bg_" + backgroundType.value + ".png')";
+
+					document.getElementById('borderSettings').removeAttribute('disabled');
+				}
+
+				changeBorders();
 			}
 
 			function processData() {
@@ -210,13 +251,28 @@
 						}
 
 						// customSign.inventoryIcon = "customicons.png:blank-black";
-						// customSign.animationParts = new Object();
+						customSign.animationParts = new Object();
 						// customSign.animationParts.displayed = "signplaceholder.png:blank";
 						// customSign.animationParts.background = "blank";
 						// customSign.animationParts.background = "hazard";
-						// customSign.animationParts.background = "signplaceholder.png:blank"; // transparent background but also removes frames :-(
 
-						blocks += "<div><p>Sign (" + (i + 1) + ", " + (j + 1) + ")</p><textarea rows=\"2\" onclick=\"this.focus();this.select()\" readonly=\"readonly\">/spawnitem customsign 1 '" + JSON.stringify(customSign) + "'</textarea><div>";
+						if (backgroundType.value == "none") {
+							customSign.animationParts.background = "signplaceholder.png:blank"; // transparent background but also removes frames :-(
+						}
+						else if (backgroundType.value != "1") {
+							var backgroundNames = [
+								"none",
+								"blank",
+								"parchment",
+								"blackboard",
+								"glass",
+								"hazard"
+							];
+
+							customSign.animationParts.background = backgroundNames[parseInt(backgroundType)];
+						}
+
+						blocks += "<div><p>" + shortDescription + " (" + (i + 1) + ", " + (j + 1) + ")</p><textarea rows=\"2\" onclick=\"this.focus();this.select()\" readonly=\"readonly\">/spawnitem customsign 1 '" + JSON.stringify(customSign) + "'</textarea><div>";
 					}
 				document.getElementById("code").innerHTML = blocks;
 			}
